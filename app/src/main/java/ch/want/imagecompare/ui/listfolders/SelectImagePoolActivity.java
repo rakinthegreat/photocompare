@@ -3,6 +3,7 @@ package ch.want.imagecompare.ui.listfolders;
 import android.app.DatePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
@@ -10,11 +11,14 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
+import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
@@ -22,6 +26,11 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -59,6 +69,7 @@ public class SelectImagePoolActivity extends AppCompatActivity implements SwipeR
     private DateFormat dateFormat;
     private final Calendar cal = Calendar.getInstance();
     private BroadcastReceiver filesDeletedBroadcastReceiver;
+    public String CurrentVersion;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -226,5 +237,109 @@ public class SelectImagePoolActivity extends AppCompatActivity implements SwipeR
             cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             dateTextControl.setText(dateFormat.format(cal.getTime()));
         }
+    }
+
+    public void PromptforUpdate(View view) {
+        StrictMode.ThreadPolicy  policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+        StrictMode.setThreadPolicy(policy);
+        PackageInfo str = null;
+        Context context = this;
+        try {
+            str = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            final String versionName = String.valueOf(str.versionCode);
+            CurrentVersion = versionName;
+            // Toast.makeText(context, versionName, Toast.LENGTH_SHORT).show();
+            if (checkupdateVersionID().equals("") || checkupdateVersionID() == null){
+                Toast.makeText(this, "Could not check for updates!", Toast.LENGTH_SHORT).show();
+            }
+            else if (!versionName.equals(checkupdateVersionID())){
+                UpdateDialog();
+                // Do What to do
+            }
+            else {
+                Toast.makeText(this, "This App is Up to Date!", Toast.LENGTH_SHORT).show();
+                // Do what to do
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void UpdateDialog(){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this, R.style.Base_Theme_MaterialComponents_Dialog_Alert);
+        alertDialogBuilder.setTitle("Update Available!!!");
+        alertDialogBuilder.setMessage("Your Current Version is " + CurrentVersion + " but the latest version is " + checkupdateVersionID() +". Do you want to download?");
+        alertDialogBuilder.setCancelable(true);
+        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                String url = updateVersionLink();
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
+        });
+        alertDialogBuilder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+
+    public String updateVersionLink(){
+        try {
+
+            URL url = new URL("https://raw.githubusercontent.com/rakinthegreat/Updates/main/PhotoCOmparelink");
+
+            // read text returned by server
+            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+
+            String line;
+            while ((line = in.readLine()) != null) {
+                // Toast.makeText(this, "Online" + line, Toast.LENGTH_SHORT).show();
+                if (!line.startsWith("http://") && !line.startsWith("https://")) {
+                    return "http://" + (line);
+                } else{
+                    return  line;
+                }
+            }
+
+        }
+        catch (MalformedURLException e) {
+            System.out.println("Malformed URL: " + e.getMessage());
+        }
+        catch (IOException e) {
+            System.out.println("I/O Error: " + e.getMessage());
+        }
+        return "";
+    }
+    public String checkupdateVersionID(){
+        try {
+
+            URL url = new URL("https://raw.githubusercontent.com/rakinthegreat/Updates/main/photocomparelatestid");
+
+            // read text returned by server
+            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+
+            String line;
+            while ((line = in.readLine()) != null) {
+                // Toast.makeText(this, "Online" + line, Toast.LENGTH_SHORT).show();
+                return(line);
+            }
+
+        }
+        catch (MalformedURLException e) {
+            System.out.println("Malformed URL: " + e.getMessage());
+        }
+        catch (IOException e) {
+            System.out.println("I/O Error: " + e.getMessage());
+        }
+        return "";
     }
 }

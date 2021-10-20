@@ -1,9 +1,11 @@
 package ch.want.imagecompare.ui.compareimages;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -44,6 +46,9 @@ public class CompareImagesActivity extends AppCompatActivity {
     private PhotoViewMediator buildPhotoViewMediator() {
         final PhotoViewMediator mediator = new PhotoViewMediator(new ImageDetailViewImpl(findViewById(R.id.upperImage)), new ImageDetailViewImpl(findViewById(R.id.bottomImage)), this);
         syncToggle = findViewById(R.id.toggleZoomPanSync);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            syncToggle.setVisibility(View.VISIBLE);
+        }
         syncToggle.setOnCheckedChangeListener((buttonView, isChecked) -> mediator.setSyncZoomAndPan(isChecked));
         syncToggle.setChecked(false);
         //
