@@ -26,22 +26,30 @@ public class ImageViewListener implements SubsamplingScaleImageView.OnImageEvent
 
     @Override
     public void onImageLoaded() {
-        listeners.forEach(ImageViewEventListener::onImageReady);
+        for (ImageViewEventListener listener : listeners) {
+            listener.onImageReady();
+        }
     }
 
     @Override
     public void onPreviewLoadError(final Exception e) {
-        listeners.forEach(ImageViewEventListener::onError);
+        for (ImageViewEventListener listener : listeners) {
+            listener.onError();
+        }
     }
 
     @Override
     public void onImageLoadError(final Exception e) {
-        listeners.forEach(ImageViewEventListener::onError);
+        for (ImageViewEventListener listener : listeners) {
+            listener.onError();
+        }
     }
 
     @Override
     public void onTileLoadError(final Exception e) {
-        listeners.forEach(ImageViewEventListener::onError);
+        for (ImageViewEventListener listener : listeners) {
+            listener.onError();
+        }
     }
 
     @Override
@@ -50,11 +58,15 @@ public class ImageViewListener implements SubsamplingScaleImageView.OnImageEvent
 
     @Override
     public void onScaleChanged(final float newScale, final int origin) {
-        listeners.forEach(l -> l.onZoomChanged(newScale));
+        for (ImageViewEventListener l : listeners) {
+            l.onZoomChanged(newScale);
+        }
     }
 
     @Override
     public void onCenterChanged(final PointF newCenter, final int origin) {
-        listeners.forEach(l -> l.onPanChanged(newCenter));
+        for (ImageViewEventListener l : listeners) {
+            l.onPanChanged(newCenter);
+        }
     }
 }

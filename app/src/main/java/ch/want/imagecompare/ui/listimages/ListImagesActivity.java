@@ -1,6 +1,7 @@
 package ch.want.imagecompare.ui.listimages;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,7 +56,8 @@ public class ListImagesActivity extends AppCompatActivity {
     private void initToolbar() {
         final Toolbar toolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
-        Optional.ofNullable(getSupportActionBar()).ifPresent(actionBar -> actionBar.setDisplayHomeAsUpEnabled(true));
+        androidx.appcompat.app.ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     private void initInitialState(final Bundle savedInstanceState) {
@@ -157,10 +159,17 @@ public class ListImagesActivity extends AppCompatActivity {
     }
 
     private void notifyAdapterDataSetChanged() {
-        runOnUiThread(() -> Optional.ofNullable(findViewById(R.id.imageThumbnails))//
-                .map(view -> (RecyclerView) view)//
-                .map(view -> (ImageBeanListRecyclerViewAdapter<?>) view.getAdapter())//
-                .ifPresent(ImageBeanListRecyclerViewAdapter::notifyDataSetChanged));
+            runOnUiThread(() -> {
+                //
+                //
+                //
+                Object view = findViewById(R.id.imageThumbnails);
+                if (view != null) {
+                    RecyclerView recyclerView = (RecyclerView) view;
+                    ImageBeanListRecyclerViewAdapter<?> adapter = (ImageBeanListRecyclerViewAdapter<?>) recyclerView.getAdapter();
+                    if (adapter != null) adapter.notifyDataSetChanged();
+                }
+            });
     }
 
     private void showAlertLosingSelection() {

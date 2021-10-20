@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 
@@ -140,7 +141,9 @@ public class FileImageMediaResolver {
      * from the camera to the phone. For such cases, sorting by filename is much more reliable.
      */
     private void sortByFilename(final List<ImageBean> galleryImageList) {
-        galleryImageList.sort(sortNewToOld ? ImageBeanComparators.byDateDesc() : ImageBeanComparators.byDateAsc());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            galleryImageList.sort(sortNewToOld ? ImageBeanComparators.byDateDesc() : ImageBeanComparators.byDateAsc());
+        }
     }
 
     static class ImageBeanComparators {
@@ -159,7 +162,10 @@ public class FileImageMediaResolver {
         }
 
         static Comparator<ImageBean> byDateDesc() {
-            return byDateAsc().reversed();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                return byDateAsc().reversed();
+            }
+            return null;
         }
     }
 }

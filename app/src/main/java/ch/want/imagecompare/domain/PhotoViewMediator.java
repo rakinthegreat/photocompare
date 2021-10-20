@@ -2,6 +2,7 @@ package ch.want.imagecompare.domain;
 
 import android.app.Activity;
 import android.graphics.PointF;
+import android.os.Build;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -193,8 +194,11 @@ public class PhotoViewMediator {
         } else {
             scaleWithOffset = sourcePanAndZoomState.getScale() / panAndZoomOffset.getScale();
         }
-        final PointF centerSource = sourcePanAndZoomState.getCenterPoint().orElse(null);
-        final PointF centerWithOffset = applyDimensionPointOffset(topView.getSourceDimension(), bottomView.getSourceDimension(), centerSource, sourceIsBottom);
+        PointF centerSource = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            centerSource = sourcePanAndZoomState.getCenterPoint().orElse(null);
+        }
+        PointF centerWithOffset = applyDimensionPointOffset(topView.getSourceDimension(), bottomView.getSourceDimension(), centerSource, sourceIsBottom);
         return new PanAndZoomState(scaleWithOffset, centerWithOffset);
     }
 
@@ -220,10 +224,16 @@ public class PhotoViewMediator {
         // note that here it would be wrong to apply getDimensionScaleOffset() again
         final float scaleOffset = topPanAndZoom.getScale() / bottomPanAndZoom.getScale();
         //
-        final PointF topCenterPoint = topPanAndZoom.getCenterPoint().orElse(null);
-        final PointF bottomCenterPoint = bottomPanAndZoom.getCenterPoint().orElse(null);
+        PointF topCenterPoint = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            topCenterPoint = topPanAndZoom.getCenterPoint().orElse(null);
+        }
+        PointF bottomCenterPoint = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            bottomCenterPoint = bottomPanAndZoom.getCenterPoint().orElse(null);
+        }
         if ((topCenterPoint != null) && (bottomCenterPoint != null)) {
-            final PointF centerOffset = getRelativeOffsetAsPoint(topDimension, topCenterPoint, bottomDimension, bottomCenterPoint);
+            PointF centerOffset = getRelativeOffsetAsPoint(topDimension, topCenterPoint, bottomDimension, bottomCenterPoint);
             panAndZoomOffset = new PanAndZoomState(scaleOffset, centerOffset);
         } else {
             panAndZoomOffset = new PanAndZoomState(scaleOffset, null);
@@ -256,16 +266,27 @@ public class PhotoViewMediator {
         if (sourceIsBottom) {
             relativeX = sourcePoint.x / bottomDimension.width * topDimension.width;
             relativeY = sourcePoint.y / bottomDimension.height * topDimension.height;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                return panAndZoomOffset.getCenterPoint().map(centerOffset -> {
+                    if (sourceIsBottom) {
+                        return new PointF(relativeX * centerOffset.x, relativeY * centerOffset.y);
+                    }
+                    return new PointF(relativeX / centerOffset.x, relativeY / centerOffset.y);
+                }).orElseGet(() -> new PointF(relativeX, relativeY));
+            }
         } else {
             relativeX = sourcePoint.x / topDimension.width * bottomDimension.width;
             relativeY = sourcePoint.y / topDimension.height * bottomDimension.height;
-        }
-        return panAndZoomOffset.getCenterPoint().map(centerOffset -> {
-            if (sourceIsBottom) {
-                return new PointF(relativeX * centerOffset.x, relativeY * centerOffset.y);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                return panAndZoomOffset.getCenterPoint().map(centerOffset -> {
+                    if (sourceIsBottom) {
+                        return new PointF(relativeX * centerOffset.x, relativeY * centerOffset.y);
+                    }
+                    return new PointF(relativeX / centerOffset.x, relativeY / centerOffset.y);
+                }).orElseGet(() -> new PointF(relativeX, relativeY));
             }
-            return new PointF(relativeX / centerOffset.x, relativeY / centerOffset.y);
-        }).orElseGet(() -> new PointF(relativeX, relativeY));
+        }
+        return sourcePoint;
     }
 
     public void resetState() {

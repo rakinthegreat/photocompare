@@ -1,6 +1,7 @@
 package ch.want.imagecompare.ui.compareimages;
 
 import android.graphics.PointF;
+import android.os.Build;
 
 import java.util.Optional;
 
@@ -53,14 +54,31 @@ abstract class ZoomPanRestoreHandler implements ViewPager.OnPageChangeListener, 
     }
 
     private void updateLastPanAndZoomState(final @Nullable Float newScale, final @Nullable PointF newCenter) {
-        final float scale = Optional.ofNullable(newScale)//
-                .orElse(Optional.ofNullable(lastPanAndZoomState)//
-                        .map(PanAndZoomState::getScale)//
-                        .orElse(1f));
-        final PointF center = Optional.ofNullable(newCenter)//
-                .orElse(Optional.ofNullable(lastPanAndZoomState)//
-                        .map(panAndZoom -> panAndZoom.getCenterPoint().orElse(null))//
-                        .orElse(null));
+        //
+        //
+        //
+        //
+        //
+        float scale = 1f;
+        if (lastPanAndZoomState != null) {
+            Float panAndZoomStateScale = lastPanAndZoomState.getScale();
+            scale = panAndZoomStateScale;
+        }
+        if (newScale != null) scale = newScale;
+        //
+        //
+        //
+        //
+        //
+        PointF center = null;
+        if (lastPanAndZoomState != null) {
+            PointF pointF = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                pointF = lastPanAndZoomState.getCenterPoint().orElse(null);
+            }
+            if (pointF != null) center = pointF;
+        }
+        if (newCenter != null) center = newCenter;
         lastPanAndZoomState = new PanAndZoomState(scale, center);
     }
 

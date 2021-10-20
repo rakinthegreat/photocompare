@@ -2,6 +2,7 @@ package ch.want.imagecompare.ui.compareimages;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.os.Build;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -155,7 +156,9 @@ public class ImageDetailViewImpl implements ImageDetailView {
     }
 
     private void setScaleAndCenter(final SubsamplingScaleImageView imageView, final PanAndZoomState panAndZoomState) {
-        imageView.setScaleAndCenter(panAndZoomState.getScale(), panAndZoomState.getCenterPoint().orElse(null));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            imageView.setScaleAndCenter(panAndZoomState.getScale(), panAndZoomState.getCenterPoint().orElse(null));
+        }
         updateExifTextView(imageView.getScale());
     }
 

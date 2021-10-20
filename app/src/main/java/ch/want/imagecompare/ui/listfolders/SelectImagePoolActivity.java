@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.DatePicker;
@@ -178,7 +179,9 @@ public class SelectImagePoolActivity extends AppCompatActivity implements SwipeR
         for (final Map.Entry<String, Uri> entry : imageBuckets.entrySet()) {
             buckets.add(new ImageBean(entry.getKey(), entry.getValue()));
         }
-        buckets.sort((a, b) -> StringUtils.compare(a.getDisplayName(), b.getDisplayName(), true));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            buckets.sort((a, b) -> StringUtils.compare(a.getDisplayName(), b.getDisplayName(), true));
+        }
         return buckets;
     }
 

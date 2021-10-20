@@ -1,6 +1,7 @@
 package ch.want.imagecompare.ui.listfolders;
 
 import android.content.res.Resources;
+import android.os.Build;
 import android.view.View;
 
 import java.io.File;
@@ -25,7 +26,9 @@ class ListFolderThumbnailsAdapter extends ImageBeanListRecyclerViewAdapter<Singl
     @Override
     public void onBindViewHolder(@NonNull final SingleFolderViewHolder viewHolder, final int i) {
         final ImageBean imageAndTitle = getImageAndTitleBean(i);
-        viewHolder.getTitleView().get().setText(imageAndTitle.getDisplayName());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            viewHolder.getTitleView().get().setText(imageAndTitle.getDisplayName());
+        }
         super.onBind(viewHolder, i);
     }
 

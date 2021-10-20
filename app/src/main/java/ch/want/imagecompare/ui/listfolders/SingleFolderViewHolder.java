@@ -1,5 +1,6 @@
 package ch.want.imagecompare.ui.listfolders;
 
+import android.os.Build;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,6 +32,9 @@ class SingleFolderViewHolder extends RecyclerView.ViewHolder implements Thumbnai
 
     @Override
     public Optional<TextView> getTitleView() {
-        return Optional.of(titleView);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Optional.of(titleView);
+        }
+        return null;
     }
 }

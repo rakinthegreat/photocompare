@@ -1,6 +1,7 @@
 package ch.want.imagecompare.ui.compareimages;
 
 import android.graphics.PointF;
+import android.os.Build;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -10,7 +11,7 @@ public class PanAndZoomState {
 
     static final PanAndZoomState DEFAULT = new PanAndZoomState();
     private final float scale;
-    private final PointF centerPoint;
+    private PointF centerPoint;
 
     private PanAndZoomState() {
         scale = 0;
@@ -24,7 +25,9 @@ public class PanAndZoomState {
 
     PanAndZoomState(final PanAndZoomState currentPhotoViewSuppMatrix) {
         scale = currentPhotoViewSuppMatrix.getScale();
-        centerPoint = currentPhotoViewSuppMatrix.getCenterPoint().orElse(null);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            centerPoint = currentPhotoViewSuppMatrix.getCenterPoint().orElse(null);
+        }
     }
 
     public Optional<PointF> getCenterPoint() {
